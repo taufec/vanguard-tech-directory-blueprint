@@ -55,4 +55,10 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const deleted = await ProjectEntity.delete(c.env, id);
     return ok(c, { id, deleted });
   });
+  app.post('/api/projects/bulk-delete', async (c) => {
+    const body = await c.req.json() as { ids: string[] };
+    if (!body.ids || !Array.isArray(body.ids)) return bad(c, 'Invalid IDs array');
+    const count = await ProjectEntity.deleteMany(c.env, body.ids);
+    return ok(c, { count });
+  });
 }
