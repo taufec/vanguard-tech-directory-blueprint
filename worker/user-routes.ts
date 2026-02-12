@@ -6,6 +6,8 @@ import { Project } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   // PROJECTS
   app.get('/api/projects', async (c) => {
+    // Ensure the database is seeded with demo content if empty
+    await ProjectEntity.ensureSeed(c.env);
     const cq = c.req.query('cursor');
     const lq = c.req.query('limit');
     const ownerId = c.req.query('ownerId');

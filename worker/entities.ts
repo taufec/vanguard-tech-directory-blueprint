@@ -1,6 +1,6 @@
 import { IndexedEntity } from "./core-utils";
 import type { User, Chat, ChatMessage, Project } from "@shared/types";
-import { MOCK_CHATS, MOCK_USERS } from "@shared/mock-data";
+import { MOCK_CHATS, MOCK_USERS, MOCK_PROJECTS } from "@shared/mock-data";
 export class UserEntity extends IndexedEntity<User> {
   static readonly entityName = "user";
   static readonly indexName = "users";
@@ -20,6 +20,7 @@ export class ProjectEntity extends IndexedEntity<Project> {
     ownerId: "",
     createdAt: 0
   };
+  static seedData = MOCK_PROJECTS;
   async update(data: Partial<Project>): Promise<Project> {
     return this.mutate(s => ({ ...s, ...data }));
   }
