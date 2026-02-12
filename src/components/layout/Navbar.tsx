@@ -1,9 +1,22 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { Rocket, Plus } from 'lucide-react';
+import { Rocket, Plus, LayoutDashboard, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { useAuthStore } from '@/store/use-auth-store';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function Navbar() {
+  const navigate = useNavigate();
+  const user = useAuthStore(s => s.user);
+  const logout = useAuthStore(s => s.logout);
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,9 +42,45 @@ export function Navbar() {
                 <span className="hidden sm:inline">Submit Project</span>
               </Button>
             </Link>
-            <Button variant="ghost" size="sm" className="hidden sm:flex">
-              Sign In
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative flex items-center gap-2 pl-2 pr-1">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={user.avatarUrl} alt={user.name} />
+                      <AvatarFallback className="text-[10px] uppercase">{user.name.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium leading-none">{user.name}</span>
+                      <span className="text-xs leading-none text-muted-foreground mt-1 capitalize">{user.role} Account</span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Dashboard</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>My Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="text-destructive focus:bg-destructive/5 focus:text-destructive" onClick={() => logout()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="sm" className="hidden sm:flex" onClick={() => navigate('/dashboard')}>
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       </div>

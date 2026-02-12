@@ -5,19 +5,34 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api-client';
-import { ExternalLink, ArrowLeft, Loader2, Calendar, User, Trash2 } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Loader2, Calendar, User, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuthStore, checkProjectAccess } from '@/store/use-auth-store';
+import { 
+  AlertDialog, 
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle, 
+  AlertDialogTrigger 
+} from '@/components/ui/alert-dialog';
 import type { Project } from '@shared/types';
 export function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const currentUser = useAuthStore(s => s.user);
   const { data: project, isLoading, error } = useQuery({
     queryKey: ['project', id],
     queryFn: () => api<Project>(`/api/projects/${id}`),
     enabled: !!id,
   });
+  const canManage = React.useMemo(() => 
+    project ? checkProjectAccess(currentUser, project.ownerId) : false
+  , [project, currentUser]);
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this project?')) return;
     try {
       await api(`/api/projects/${id}`, { method: 'DELETE' });
       toast.success('Project deleted');
@@ -68,7 +83,12 @@ export function ProjectDetailPage() {
             </div>
             <div className="flex-1 space-y-4">
               <div className="space-y-2">
-                <h1 className="text-3xl md:text-5xl font-bold tracking-tight">{project.title}</h1>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight">{project.title}</h1>
+                  {canManage && (
+                    <Badge variant="outline" className="uppercase text-[10px] text-primary border-primary">Owner</Badge>
+                  )}
+                </div>
                 <p className="text-xl text-muted-foreground max-w-2xl">{project.tagline}</p>
               </div>
               <div className="flex flex-wrap gap-4 items-center pt-2">
@@ -77,9 +97,37 @@ export function ProjectDetailPage() {
                     Visit Website <ExternalLink className="w-4 h-4" />
                   </Button>
                 </a>
-                <Button variant="outline" className="h-11 px-6 font-medium text-destructive hover:bg-destructive/5" onClick={handleDelete}>
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete
-                </Button>
+                {canManage && (
+                  <div className="flex items-center gap-2">
+                    <Link to={`/submit/${project.id}`}>
+                      <Button variant="outline" className="h-11 px-6 font-medium">
+                        <Edit className="w-4 h-4 mr-2" /> Edit
+                      </Button>
+                    </Link>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" className="h-11 px-6 font-medium text-destructive hover:bg-destructive/5">
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your project
+                            listing from our directory.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Delete Project
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
               </div>
             </div>
           </div>

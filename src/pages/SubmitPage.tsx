@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -11,26 +11,59 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { api } from '@/lib/api-client';
-import { Upload, X, Loader2 } from 'lucide-react';
+import { useAuthStore } from '@/store/use-auth-store';
+import { Upload, X, Loader2, ArrowLeft } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import type { Project } from '@shared/types';
 const schema = z.object({
   title: z.string().min(2, 'Title is too short').max(50),
   tagline: z.string().min(10, 'Tagline is too short').max(100),
   url: z.string().url('Invalid URL'),
   description: z.string().min(50, 'Please provide a more detailed description'),
-  tags: z.string().transform(val => val.split(',').map(t => t.trim()).filter(Boolean)),
+  tags: z.string().min(1, 'At least one tag is required'),
   logoUrl: z.string().optional(),
   screenshotUrl: z.string().optional(),
 });
-type FormValues = z.infer<typeof schema>;
+type FormInput = z.infer<typeof schema>;
 export function SubmitPage() {
+  const { id } = useParams();
   const navigate = useNavigate();
+  const user = useAuthStore(s => s.user);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
   const [screenPreview, setScreenPreview] = React.useState<string | null>(null);
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormValues>({
-    resolver: zodResolver(schema),
-    defaultValues: { tags: [] as any }
+  const { data: project } = useQuery({
+    queryKey: ['project', id],
+    queryFn: () => api<Project>(`/api/projects/${id}`),
+    enabled: !!id,
   });
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm<FormInput>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      title: '',
+      tagline: '',
+      url: '',
+      description: '',
+      tags: '',
+      logoUrl: '',
+      screenshotUrl: '',
+    }
+  });
+  React.useEffect(() => {
+    if (project) {
+      reset({
+        title: project.title,
+        tagline: project.tagline,
+        url: project.url,
+        description: project.description,
+        tags: project.tags.join(', '),
+        logoUrl: project.logoUrl,
+        screenshotUrl: project.screenshotUrl,
+      });
+      if (project.logoUrl) setLogoPreview(project.logoUrl);
+      if (project.screenshotUrl) setScreenPreview(project.screenshotUrl);
+    }
+  }, [project, reset]);
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'screenshot') => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -51,30 +84,51 @@ export function SubmitPage() {
     };
     reader.readAsDataURL(file);
   };
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (values: FormInput) => {
+    if (!user) {
+      toast.error('Please sign in to submit a project');
+      return;
+    }
     setIsSubmitting(true);
     try {
-      await api('/api/projects', {
-        method: 'POST',
-        body: JSON.stringify(values),
-      });
-      toast.success('Project submitted successfully!');
-      navigate('/');
+      const payload = {
+        ...values,
+        tags: values.tags.split(',').map(t => t.trim()).filter(Boolean),
+        ownerId: user.id,
+      };
+      if (id) {
+        await api(`/api/projects/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        });
+        toast.success('Project updated successfully!');
+      } else {
+        await api('/api/projects', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        toast.success('Project submitted successfully!');
+      }
+      navigate(id ? `/project/${id}` : '/');
     } catch (err) {
-      console.error(err);
       toast.error('Submission failed', { description: err instanceof Error ? err.message : 'Unknown error' });
     } finally {
       setIsSubmitting(false);
     }
   };
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen bg-muted/30 pb-20">
       <Navbar />
-      <div className="max-w-3xl mx-auto px-4 py-12 md:py-16">
-        <Card className="border-border/50">
+      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="mb-6 gap-2">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </Button>
+        <Card className="border-border/50 shadow-sm">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">Submit a Project</CardTitle>
-            <CardDescription>Share your creation with the Vanguard community.</CardDescription>
+            <CardTitle className="text-2xl font-bold">{id ? 'Edit Project' : 'Submit a Project'}</CardTitle>
+            <CardDescription>
+              {id ? 'Refine your project details and media.' : 'Share your creation with the Vanguard community.'}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -97,9 +151,9 @@ export function SubmitPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Detailed Description</Label>
-                <Textarea 
-                  id="description" 
-                  placeholder="Tell us more about what it does, why you built it, and the tech stack." 
+                <Textarea
+                  id="description"
+                  placeholder="Tell us more about what it does, why you built it, and the tech stack."
                   className="min-h-[120px] resize-none"
                   {...register('description')}
                 />
@@ -108,6 +162,7 @@ export function SubmitPage() {
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (comma separated)</Label>
                 <Input id="tags" placeholder="SaaS, DevTools, Open Source..." {...register('tags')} />
+                {errors.tags && <p className="text-xs text-destructive">{errors.tags.message}</p>}
               </div>
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-3">
@@ -115,7 +170,7 @@ export function SubmitPage() {
                   {logoPreview ? (
                     <div className="relative w-24 h-24 rounded-xl border p-2 bg-background group">
                       <img src={logoPreview} alt="Logo" className="w-full h-full object-contain" />
-                      <button 
+                      <button
                         type="button"
                         onClick={() => { setLogoPreview(null); setValue('logoUrl', ''); }}
                         className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full"
@@ -135,7 +190,7 @@ export function SubmitPage() {
                   {screenPreview ? (
                     <div className="relative aspect-video rounded-xl border overflow-hidden bg-background">
                       <img src={screenPreview} alt="Screenshot" className="w-full h-full object-cover" />
-                      <button 
+                      <button
                         type="button"
                         onClick={() => { setScreenPreview(null); setValue('screenshotUrl', ''); }}
                         className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full"
@@ -153,7 +208,7 @@ export function SubmitPage() {
                 </div>
               </div>
               <Button type="submit" className="w-full h-12 text-lg font-bold" disabled={isSubmitting}>
-                {isSubmitting ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Submitting...</> : 'Submit Project'}
+                {isSubmitting ? <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Processing...</> : (id ? 'Update Project' : 'Submit Project')}
               </Button>
             </form>
           </CardContent>

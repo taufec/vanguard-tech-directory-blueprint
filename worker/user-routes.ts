@@ -8,8 +8,13 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/projects', async (c) => {
     const cq = c.req.query('cursor');
     const lq = c.req.query('limit');
-    const page = await ProjectEntity.list(c.env, cq ?? null, lq ? Math.max(1, (Number(lq) | 0)) : 20);
-    return ok(c, page);
+    const ownerId = c.req.query('ownerId');
+    let { items, next } = await ProjectEntity.list(c.env, cq ?? null, lq ? Math.max(1, (Number(lq) | 0)) : 100);
+    // Filter by ownerId if provided
+    if (ownerId) {
+      items = items.filter(p => p.ownerId === ownerId);
+    }
+    return ok(c, { items, next });
   });
   app.get('/api/projects/:id', async (c) => {
     const id = c.req.param('id');
