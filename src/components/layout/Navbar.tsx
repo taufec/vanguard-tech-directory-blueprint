@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { Rocket, Plus, LayoutDashboard, LogOut, User as UserIcon, ChevronDown } from 'lucide-react';
+import { Rocket, Plus, LayoutDashboard, LogOut, User as UserIcon, ChevronDown, Database } from 'lucide-react';
 import { useAuthStore } from '@/store/use-auth-store';
 import {
   DropdownMenu,
@@ -65,6 +65,12 @@ export function Navbar() {
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
+                  {user.role === 'admin' && (
+                    <DropdownMenuItem onClick={() => navigate('/admin-db')}>
+                      <Database className="mr-2 h-4 w-4" />
+                      <span>Database (Admin)</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem>
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>My Profile</span>
