@@ -3,11 +3,13 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
+export type UserRole = 'user' | 'admin';
 export interface User {
   id: string;
   name: string;
   email?: string;
   avatarUrl?: string;
+  role: UserRole;
 }
 export interface Project {
   id: string;

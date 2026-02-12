@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api-client';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Plus, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
+import { Edit, Trash2, Plus, LayoutGrid, List, ExternalLink, Loader2 } from 'lucide-react';
 import type { Project } from '@shared/types';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -45,17 +45,6 @@ export function DashboardPage() {
             <h1 className="text-3xl font-bold tracking-tight">Your Projects</h1>
             <p className="text-muted-foreground">Manage and monitor your submissions.</p>
           </div>
-          {user.role === 'admin' && (
-            <div className="flex-1 max-w-xs md:mx-6 bg-accent/50 border border-accent rounded-lg p-3 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-xs">
-                <ShieldCheck className="w-4 h-4 text-primary" />
-                <span className="font-medium">Administrator Access</span>
-              </div>
-              <Link to="/admin-db">
-                <Button size="sm" variant="outline" className="text-[10px] h-7 px-2">Enter Admin DB</Button>
-              </Link>
-            </div>
-          )}
           <Link to="/submit">
             <Button className="gap-2">
               <Plus className="w-4 h-4" /> Submit New Project
@@ -72,10 +61,10 @@ export function DashboardPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 border-b">
                   <tr>
-                    <th className="px-6 py-4 font-semibold text-foreground">Project</th>
-                    <th className="px-6 py-4 font-semibold text-foreground">Status</th>
-                    <th className="px-6 py-4 font-semibold text-foreground">Launched</th>
-                    <th className="px-6 py-4 font-semibold text-right text-foreground">Actions</th>
+                    <th className="px-6 py-4 font-semibold">Project</th>
+                    <th className="px-6 py-4 font-semibold">Status</th>
+                    <th className="px-6 py-4 font-semibold">Launched</th>
+                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -116,9 +105,9 @@ export function DashboardPage() {
                               <Edit className="w-4 h-4" />
                             </Button>
                           </Link>
-                          <Button
-                            variant="ghost"
-                            size="icon"
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
                             onClick={() => handleDelete(p.id)}
                           >
