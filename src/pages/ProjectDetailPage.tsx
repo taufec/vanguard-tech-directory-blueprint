@@ -8,16 +8,16 @@ import { api } from '@/lib/api-client';
 import { ExternalLink, ArrowLeft, Loader2, Calendar, User, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore, checkProjectAccess } from '@/store/use-auth-store';
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle, 
-  AlertDialogTrigger 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
 import type { Project } from '@shared/types';
 export function ProjectDetailPage() {
@@ -29,7 +29,7 @@ export function ProjectDetailPage() {
     queryFn: () => api<Project>(`/api/projects/${id}`),
     enabled: !!id,
   });
-  const canManage = React.useMemo(() => 
+  const canManage = React.useMemo(() =>
     project ? checkProjectAccess(currentUser, project.ownerId) : false
   , [project, currentUser]);
   const handleDelete = async () => {
@@ -68,45 +68,45 @@ export function ProjectDetailPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
       <main className="flex-1 pb-20">
-        <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 space-y-8">
-          <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors group">
+        <div className="max-w-5xl mx-auto px-4 py-8 md:py-12 space-y-12">
+          <Link to="/" className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group">
             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Back to Directory
           </Link>
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-3xl bg-white border p-3 shadow-sm flex-shrink-0">
+          <div className="flex flex-col md:flex-row gap-10 items-start">
+            <div className="w-24 h-24 sm:w-36 sm:h-36 rounded-3xl bg-white border border-border/50 p-4 shadow-xl flex-shrink-0 flex items-center justify-center">
               {project.logoUrl ? (
                 <img src={project.logoUrl} alt="" className="w-full h-full object-contain" />
               ) : (
                 <div className="w-full h-full bg-muted rounded-2xl" />
               )}
             </div>
-            <div className="flex-1 space-y-4">
-              <div className="space-y-2">
+            <div className="flex-1 space-y-6">
+              <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl md:text-5xl font-bold tracking-tight">{project.title}</h1>
+                  <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">{project.title}</h1>
                   {canManage && (
-                    <Badge variant="outline" className="uppercase text-[10px] text-primary border-primary">Owner</Badge>
+                    <Badge variant="outline" className="uppercase text-[10px] text-primary border-primary font-bold">Owner</Badge>
                   )}
                 </div>
-                <p className="text-xl text-muted-foreground max-w-2xl">{project.tagline}</p>
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl leading-relaxed">{project.tagline}</p>
               </div>
-              <div className="flex flex-wrap gap-4 items-center pt-2">
+              <div className="flex flex-wrap gap-4 items-center">
                 <a href={project.url} target="_blank" rel="noopener noreferrer">
-                  <Button className="h-11 px-8 font-bold gap-2">
-                    Visit Website <ExternalLink className="w-4 h-4" />
+                  <Button className="h-12 px-10 font-bold gap-2 text-lg shadow-primary">
+                    Visit Website <ExternalLink className="w-5 h-5" />
                   </Button>
                 </a>
                 {canManage && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <Link to={`/submit/${project.id}`}>
-                      <Button variant="outline" className="h-11 px-6 font-medium">
+                      <Button variant="outline" className="h-12 px-6 font-semibold">
                         <Edit className="w-4 h-4 mr-2" /> Edit
                       </Button>
                     </Link>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="outline" className="h-11 px-6 font-medium text-destructive hover:bg-destructive/5">
+                        <Button variant="outline" className="h-12 px-6 font-semibold text-destructive hover:bg-destructive/5 hover:text-destructive">
                           <Trash2 className="w-4 h-4 mr-2" /> Delete
                         </Button>
                       </AlertDialogTrigger>
@@ -131,43 +131,57 @@ export function ProjectDetailPage() {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 pt-8 border-t">
-            <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 pt-12 border-t border-border/50">
+            <div className="lg:col-span-2 space-y-12">
               {project.screenshotUrl && (
-                <div className="rounded-2xl border overflow-hidden shadow-2xl bg-muted">
-                  <img src={project.screenshotUrl} alt="Preview" className="w-full object-cover" />
+                <div className="rounded-3xl border border-border/50 overflow-hidden shadow-2xl bg-muted/30">
+                  <img src={project.screenshotUrl} alt="Preview" className="w-full object-cover aspect-[16/10]" />
                 </div>
               )}
-              <div className="space-y-4">
-                <h2 className="text-2xl font-bold">About the project</h2>
-                <div className="prose prose-neutral dark:prose-invert max-w-none text-muted-foreground leading-relaxed whitespace-pre-wrap">
+              <div className="space-y-6">
+                <h2 className="text-3xl font-bold tracking-tight">About the project</h2>
+                <div className="text-lg text-muted-foreground leading-relaxed whitespace-pre-wrap max-w-none prose prose-neutral dark:prose-invert">
                   {project.description}
                 </div>
               </div>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-10">
               <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Categories</h3>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/80">Categories</h3>
                 <div className="flex flex-wrap gap-2">
                   {project.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="px-3 py-1 text-xs">
+                    <Badge key={tag} variant="secondary" className="px-4 py-1.5 text-xs font-semibold bg-primary/5 hover:bg-primary/10 transition-colors">
                       {tag}
                     </Badge>
                   ))}
                 </div>
               </div>
               <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Details</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center text-sm text-muted-foreground gap-3">
-                    <User className="w-4 h-4" />
-                    <span>Owner: <span className="text-foreground font-medium">{project.ownerId}</span></span>
+                <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/80">Details</h3>
+                <div className="space-y-5">
+                  <div className="flex items-center text-sm text-muted-foreground gap-4">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <span>Owner: <span className="text-foreground font-semibold ml-1">{project.ownerId}</span></span>
                   </div>
-                  <div className="flex items-center text-sm text-muted-foreground gap-3">
-                    <Calendar className="w-4 h-4" />
-                    <span>Launched: <span className="text-foreground font-medium">{new Date(project.createdAt).toLocaleDateString()}</span></span>
+                  <div className="flex items-center text-sm text-muted-foreground gap-4">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <span>Launched: <span className="text-foreground font-semibold ml-1">{new Date(project.createdAt).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}</span></span>
                   </div>
                 </div>
+              </div>
+              <div className="p-6 rounded-2xl bg-primary/[0.02] border border-primary/10 space-y-4">
+                <h4 className="font-bold">Support this project</h4>
+                <p className="text-sm text-muted-foreground">Sharing this project helps the creator grow their reach. Use the link below to share.</p>
+                <Button variant="outline" className="w-full" onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success("Link copied to clipboard!");
+                }}>
+                  Copy Project Link
+                </Button>
               </div>
             </div>
           </div>
