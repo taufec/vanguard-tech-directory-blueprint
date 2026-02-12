@@ -45,12 +45,10 @@ const router = createBrowserRouter([
   },
 ]);
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
-        <RouterProvider router={router} />
-        <Toaster richColors closeButton position="top-center" />
-      </ErrorBoundary>
-    </QueryClientProvider>
-  </StrictMode>,
+  <QueryClientProvider client={queryClient}>
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+      <Toaster richColors closeButton position="top-center" />
+    </ErrorBoundary>
+  </QueryClientProvider>
 )
