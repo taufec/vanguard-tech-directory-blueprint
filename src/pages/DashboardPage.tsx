@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api-client';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Plus, LayoutGrid, List, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
+import { Edit, Trash2, Plus, ExternalLink, Loader2, ShieldCheck } from 'lucide-react';
 import type { Project } from '@shared/types';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +52,7 @@ export function DashboardPage() {
                 <span className="font-medium">Administrator Access</span>
               </div>
               <Link to="/admin-db">
-                <Button size="xs" variant="outline" className="text-[10px] h-7">Enter Admin DB</Button>
+                <Button size="sm" variant="outline" className="text-[10px] h-7 px-2">Enter Admin DB</Button>
               </Link>
             </div>
           )}
@@ -72,10 +72,10 @@ export function DashboardPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-muted/50 border-b">
                   <tr>
-                    <th className="px-6 py-4 font-semibold">Project</th>
-                    <th className="px-6 py-4 font-semibold">Status</th>
-                    <th className="px-6 py-4 font-semibold">Launched</th>
-                    <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                    <th className="px-6 py-4 font-semibold text-foreground">Project</th>
+                    <th className="px-6 py-4 font-semibold text-foreground">Status</th>
+                    <th className="px-6 py-4 font-semibold text-foreground">Launched</th>
+                    <th className="px-6 py-4 font-semibold text-right text-foreground">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -116,9 +116,9 @@ export function DashboardPage() {
                               <Edit className="w-4 h-4" />
                             </Button>
                           </Link>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
                             onClick={() => handleDelete(p.id)}
                           >
