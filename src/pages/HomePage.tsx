@@ -8,19 +8,27 @@ import { Search, Loader2, Plus, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import type { Project } from '@shared/types';
+import { cn } from '@/lib/utils';
+const CATEGORIES = ['All', 'SaaS', 'DevTools', 'Web3', 'Design', 'Analytics', 'Productivity', 'Infrastructure'];
 export function HomePage() {
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [selectedCategory, setSelectedCategory] = React.useState('All');
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { data, isLoading, error } = useQuery({
     queryKey: ['projects'],
     queryFn: () => api<{ items: Project[] }>('/api/projects'),
   });
   const projects = data?.items ?? [];
-  const filteredProjects = projects.filter(p =>
-    p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredProjects = projects.filter(p => {
+    const matchesSearch = 
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesCategory = 
+      selectedCategory === 'All' || 
+      p.tags.some(t => t.toLowerCase() === selectedCategory.toLowerCase());
+    return matchesSearch && matchesCategory;
+  });
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
@@ -43,11 +51,28 @@ export function HomePage() {
               <Input
                 ref={searchInputRef}
                 placeholder="Search projects, tags, or tools..."
-                className="pl-11 h-12 bg-secondary/50 border-border/50 focus:bg-background transition-all shadow-sm focus:shadow-md"
+                className="pl-11 h-12 bg-secondary/50 border-border/50 focus:bg-background transition-all shadow-sm focus:shadow-md rounded-xl"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+          </div>
+          {/* Category Tabs */}
+          <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-4 no-scrollbar">
+            {CATEGORIES.map((category) => (
+              <Button
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                size="sm"
+                className={cn(
+                  "rounded-full px-5 py-2 h-auto text-sm font-medium transition-all shrink-0",
+                  selectedCategory === category ? "shadow-md scale-105" : "text-muted-foreground border-border/50 hover:bg-muted/50"
+                )}
+                onClick={() => setSelectedCategory(category)}
+              >
+                {category}
+              </Button>
+            ))}
           </div>
           {/* Grid Section */}
           {isLoading ? (
@@ -70,15 +95,15 @@ export function HomePage() {
               <div className="space-y-2">
                 <p className="text-xl font-bold">No results found</p>
                 <p className="text-muted-foreground">
-                  {searchQuery 
-                    ? `We couldn't find any projects matching "${searchQuery}"`
-                    : "The directory is currently empty."}
+                  {searchQuery
+                    ? `We couldn't find any projects matching "${searchQuery}" in ${selectedCategory}`
+                    : `The ${selectedCategory} category is currently empty.`}
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                {searchQuery && (
-                  <Button variant="outline" onClick={() => setSearchQuery('')}>
-                    Clear Search
+                {(searchQuery || selectedCategory !== 'All') && (
+                  <Button variant="outline" onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}>
+                    Clear Filters
                   </Button>
                 )}
                 <Link to="/submit">
