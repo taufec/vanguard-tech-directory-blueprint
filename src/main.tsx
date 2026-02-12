@@ -15,6 +15,7 @@ import { HomePage } from '@/pages/HomePage'
 import { SubmitPage } from '@/pages/SubmitPage'
 import { ProjectDetailPage } from '@/pages/ProjectDetailPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { AdminPage } from '@/pages/AdminPage'
 import { Toaster } from '@/components/ui/sonner'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -36,6 +37,11 @@ const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <DashboardPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin-db",
+    element: <AdminPage />,
     errorElement: <RouteErrorBoundary />,
   },
   {

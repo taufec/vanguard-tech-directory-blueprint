@@ -4,7 +4,7 @@ import { MOCK_CHATS, MOCK_USERS } from "@shared/mock-data";
 export class UserEntity extends IndexedEntity<User> {
   static readonly entityName = "user";
   static readonly indexName = "users";
-  static readonly initialState: User = { id: "", name: "" };
+  static readonly initialState: User = { id: "", name: "", role: "user" };
   static seedData = MOCK_USERS;
 }
 export class ProjectEntity extends IndexedEntity<Project> {
