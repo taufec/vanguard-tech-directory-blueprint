@@ -22,6 +22,7 @@ export interface Project {
   tags: string[];
   ownerId: string;
   createdAt: number;
+  votes: number;
 }
 export interface Chat {
   id: string;

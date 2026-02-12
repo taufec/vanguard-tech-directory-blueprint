@@ -39,17 +39,26 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       screenshotUrl: body.screenshotUrl,
       tags: body.tags || [],
       ownerId: body.ownerId || "anonymous",
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      votes: 0
     };
     const created = await ProjectEntity.create(c.env, project);
     return ok(c, created);
+  });
+  app.post('/api/projects/:id/vote', async (c) => {
+    const id = c.req.param('id');
+    const entity = new ProjectEntity(c.env, id);
+    if (!await entity.exists()) return notFound(c, 'Project not found');
+    const updated = await entity.mutate(s => ({ ...s, votes: (s.votes || 0) + 1 }));
+    return ok(c, updated);
   });
   app.put('/api/projects/:id', async (c) => {
     const id = c.req.param('id');
     const body = await c.req.json() as Partial<Project>;
     const entity = new ProjectEntity(c.env, id);
     if (!await entity.exists()) return notFound(c, 'Project not found');
-    const updated = await entity.update(body);
+    const current = await entity.getState();
+    const updated = await entity.update({ ...body, votes: body.votes !== undefined ? body.votes : current.votes });
     return ok(c, updated);
   });
   app.delete('/api/projects/:id', async (c) => {
