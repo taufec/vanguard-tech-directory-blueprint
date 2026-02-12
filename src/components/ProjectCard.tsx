@@ -9,13 +9,13 @@ interface ProjectCardProps {
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link to={`/project/${project.id}`}>
-      <Card className="group overflow-hidden border-border/50 bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
-        <div className="aspect-video w-full overflow-hidden bg-muted relative">
+      <Card className="group overflow-hidden border-border/50 bg-card hover:border-primary/50 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+        <div className="aspect-video w-full overflow-hidden bg-muted/50 relative">
           {project.screenshotUrl ? (
             <img
               src={project.screenshotUrl}
               alt={project.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"
             />
           ) : (
@@ -25,7 +25,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           )}
           <div className="absolute top-3 left-3">
             {project.logoUrl && (
-              <div className="w-10 h-10 rounded-xl bg-white p-1 shadow-sm border overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-white p-1 shadow-md border border-border/10 overflow-hidden flex items-center justify-center">
                 <img src={project.logoUrl} alt="" className="w-full h-full object-contain" />
               </div>
             )}
@@ -37,13 +37,13 @@ export function ProjectCard({ project }: ProjectCardProps) {
               {project.title}
             </h3>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2">
+          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
             {project.tagline}
           </p>
         </CardContent>
         <CardFooter className="px-5 py-4 pt-0 flex flex-wrap gap-1.5 mt-auto">
           {project.tags.slice(0, 3).map(tag => (
-            <Badge key={tag} variant="secondary" className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0">
+            <Badge key={tag} variant="secondary" className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 bg-accent/30 text-accent-foreground">
               {tag}
             </Badge>
           ))}
