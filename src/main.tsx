@@ -14,6 +14,7 @@ import '@/index.css'
 import { HomePage } from '@/pages/HomePage'
 import { SubmitPage } from '@/pages/SubmitPage'
 import { ProjectDetailPage } from '@/pages/ProjectDetailPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { Toaster } from '@/components/ui/sonner'
 const queryClient = new QueryClient();
 const router = createBrowserRouter([
@@ -28,6 +29,16 @@ const router = createBrowserRouter([
     errorElement: <RouteErrorBoundary />,
   },
   {
+    path: "/submit/:id",
+    element: <SubmitPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/dashboard",
+    element: <DashboardPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
     path: "/project/:id",
     element: <ProjectDetailPage />,
     errorElement: <RouteErrorBoundary />,
@@ -38,7 +49,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <RouterProvider router={router} />
-        <Toaster richColors closeButton />
+        <Toaster richColors closeButton position="top-center" />
       </ErrorBoundary>
     </QueryClientProvider>
   </StrictMode>,
