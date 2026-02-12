@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
-import { ProjectEntity, Index } from "./entities";
+import { ProjectEntity } from "./entities";
 import { ok, bad, notFound, isStr } from './core-utils';
 import { Project } from "@shared/types";
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
