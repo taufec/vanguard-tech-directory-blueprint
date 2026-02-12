@@ -15,7 +15,10 @@ import {
   CheckSquare,
   Square,
   Edit,
-  MoreVertical
+  MoreVertical,
+  Download,
+  Upload,
+  FileJson
 } from 'lucide-react';
 import type { Project } from '@shared/types';
 import { toast } from 'sonner';
@@ -35,11 +38,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
 export function AdminPage() {
   const navigate = useNavigate();
   const user = useAuthStore(s => s.user);
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [search, setSearch] = React.useState('');
+  const [isExporting, setIsExporting] = React.useState(false);
+  const [isImporting, setIsImporting] = React.useState(false);
+  const [importDialogOpen, setImportDialogOpen] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['admin-projects'],
     queryFn: () => api<{ items: Project[] }>('/api/projects'),
@@ -75,6 +91,49 @@ export function AdminPage() {
       setSelectedIds(new Set(filteredProjects.map(p => p.id)));
     }
   };
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const data = await api<Project[]>('/api/projects/export');
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `vanguard-backup-${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      toast.success('Database exported successfully');
+    } catch (err) {
+      toast.error('Export failed');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        await api('/api/projects/import', {
+          method: 'POST',
+          body: JSON.stringify(json),
+        });
+        toast.success('Import successful');
+        setImportDialogOpen(false);
+        refetch();
+      } catch (err) {
+        toast.error('Import failed', { description: 'Ensure the file is a valid Vanguard JSON export' });
+      } finally {
+        setIsImporting(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }
+    };
+    reader.readAsText(file);
+  };
   const handleBulkDelete = async () => {
     if (!window.confirm(`Delete ${selectedIds.size} projects? This cannot be undone.`)) return;
     try {
@@ -106,9 +165,62 @@ export function AdminPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">Database Admin</h1>
-            <p className="text-muted-foreground">Global directory management and curation.</p>
+            <p className="text-muted-foreground">Global directory management and portability.</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center bg-muted/50 rounded-lg p-1 border">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 h-8" 
+                onClick={handleExport}
+                disabled={isExporting}
+              >
+                {isExporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
+                Export
+              </Button>
+              <div className="w-px h-4 bg-border mx-1" />
+              <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="gap-2 h-8">
+                    <Upload className="w-3.5 h-3.5" />
+                    Import
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Import Database</DialogTitle>
+                    <DialogDescription>
+                      Upload a Vanguard JSON backup file to restore or migrate project records.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="py-6 flex flex-col items-center justify-center border-2 border-dashed rounded-xl bg-muted/30">
+                    <FileJson className="w-12 h-12 text-muted-foreground mb-4 opacity-40" />
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImport}
+                      accept=".json"
+                      className="hidden"
+                      id="import-file"
+                    />
+                    <label htmlFor="import-file">
+                      <Button asChild variant="secondary" disabled={isImporting}>
+                        <span>
+                          {isImporting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                          Choose JSON File
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
+                  <DialogFooter className="sm:justify-start">
+                    <p className="text-[10px] text-muted-foreground">
+                      Warning: Importing may overwrite existing entries with the same IDs.
+                    </p>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
             {selectedIds.size > 0 && (
               <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="gap-2">
                 <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
@@ -135,10 +247,10 @@ export function AdminPage() {
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
                 <TableHead className="w-12">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={toggleSelectAll} 
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleSelectAll}
                     className="h-8 w-8"
                     aria-label={selectedIds.size === filteredProjects.length ? "Deselect all" : "Select all"}
                   >
@@ -177,10 +289,10 @@ export function AdminPage() {
                 filteredProjects.map((p) => (
                   <TableRow key={p.id} className={selectedIds.has(p.id) ? "bg-accent/50" : "hover:bg-muted/30"}>
                     <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        onClick={() => toggleSelect(p.id)} 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => toggleSelect(p.id)}
                         className="h-8 w-8"
                         aria-label={selectedIds.has(p.id) ? "Deselect project" : "Select project"}
                       >

@@ -18,7 +18,8 @@ export class ProjectEntity extends IndexedEntity<Project> {
     url: "",
     tags: [],
     ownerId: "",
-    createdAt: 0
+    createdAt: 0,
+    votes: 0
   };
   static seedData = MOCK_PROJECTS;
   async update(data: Partial<Project>): Promise<Project> {
