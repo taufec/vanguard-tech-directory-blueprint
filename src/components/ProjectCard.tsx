@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ChevronUp } from 'lucide-react';
 import type { Project } from '@shared/types';
 interface ProjectCardProps {
   project: Project;
@@ -23,12 +24,18 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <span className="text-sm font-medium">No Preview</span>
             </div>
           )}
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 flex items-start gap-2">
             {project.logoUrl && (
-              <div className="w-10 h-10 rounded-xl bg-white p-1 shadow-md border border-border/10 overflow-hidden flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-white p-1 shadow-md border border-border/10 overflow-hidden flex items-center justify-center shrink-0">
                 <img src={project.logoUrl} alt="" className="w-full h-full object-contain" />
               </div>
             )}
+          </div>
+          <div className="absolute top-3 right-3">
+             <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-border/20 shadow-sm flex items-center gap-1.5 text-xs font-bold">
+                <ChevronUp className="w-3.5 h-3.5 text-primary" />
+                <span>{project.votes || 0}</span>
+             </div>
           </div>
         </div>
         <CardContent className="p-5 flex-1 space-y-2">

@@ -1,11 +1,11 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { api } from '@/lib/api-client';
-import { ExternalLink, ArrowLeft, Loader2, Calendar, User, Trash2, Edit } from 'lucide-react';
+import { ExternalLink, ArrowLeft, Loader2, Calendar, User, Trash2, Edit, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuthStore, checkProjectAccess } from '@/store/use-auth-store';
 import {
@@ -23,11 +23,39 @@ import type { Project } from '@shared/types';
 export function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const currentUser = useAuthStore(s => s.user);
   const { data: project, isLoading, error } = useQuery({
     queryKey: ['project', id],
     queryFn: () => api<Project>(`/api/projects/${id}`),
     enabled: !!id,
+  });
+  const voteMutation = useMutation({
+    mutationFn: () => api<Project>(`/api/projects/${id}/vote`, { method: 'POST' }),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ['project', id] });
+      const previousProject = queryClient.getQueryData<Project>(['project', id]);
+      if (previousProject) {
+        queryClient.setQueryData(['project', id], {
+          ...previousProject,
+          votes: (previousProject.votes || 0) + 1,
+        });
+      }
+      return { previousProject };
+    },
+    onError: (err, _, context) => {
+      if (context?.previousProject) {
+        queryClient.setQueryData(['project', id], context.previousProject);
+      }
+      toast.error('Failed to register vote');
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', id] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+    onSuccess: () => {
+      toast.success('Thanks for voting!');
+    }
   });
   const canManage = React.useMemo(() =>
     project ? checkProjectAccess(currentUser, project.ownerId) : false
@@ -97,6 +125,15 @@ export function ProjectDetailPage() {
                     Visit Website <ExternalLink className="w-5 h-5" />
                   </Button>
                 </a>
+                <Button 
+                  onClick={() => voteMutation.mutate()}
+                  disabled={voteMutation.isPending}
+                  variant="outline" 
+                  className="h-12 px-6 font-bold border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all gap-2"
+                >
+                  <ChevronUp className="w-6 h-6 text-primary" />
+                  <span className="text-lg">{project.votes || 0}</span>
+                </Button>
                 {canManage && (
                   <div className="flex items-center gap-3">
                     <Link to={`/submit/${project.id}`}>
