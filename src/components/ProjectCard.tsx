@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink } from 'lucide-react';
 import type { Project } from '@shared/types';
 interface ProjectCardProps {
   project: Project;
@@ -13,9 +12,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <Card className="group overflow-hidden border-border/50 bg-card hover:border-primary/50 hover:shadow-lg transition-all duration-300 h-full flex flex-col">
         <div className="aspect-video w-full overflow-hidden bg-muted relative">
           {project.screenshotUrl ? (
-            <img 
-              src={project.screenshotUrl} 
-              alt={project.title} 
+            <img
+              src={project.screenshotUrl}
+              alt={project.title}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               loading="lazy"
             />
@@ -34,7 +33,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
         </div>
         <CardContent className="p-5 flex-1 space-y-2">
           <div className="flex items-start justify-between">
-            <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">
+            <h3 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors line-clamp-1">
               {project.title}
             </h3>
           </div>
