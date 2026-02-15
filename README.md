@@ -1,6 +1,6 @@
 # Vanguard Directory
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/taufec/vanguard-tech-directory-blueprint)]
 
 A production-ready full-stack chat application built on Cloudflare Workers. This project demonstrates a scalable, type-safe architecture using Durable Objects for multi-tenant entity storage (users, chats, messages), Hono for routing, and a modern React frontend with shadcn/ui.
 
@@ -88,7 +88,7 @@ Configuration in `wrangler.jsonc`:
 - Assets served as SPA (single-page app).
 - API routes (`/api/*`) handled by Worker first.
 
-[![Deploy to Cloudflare][cloudflarebutton]]
+[![Deploy to Cloudflare][![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/taufec/vanguard-tech-directory-blueprint)]
 
 **Pro Tip**: Use Cloudflare Pages for frontend-only deploys or bind Workers for hybrid setups.
 
