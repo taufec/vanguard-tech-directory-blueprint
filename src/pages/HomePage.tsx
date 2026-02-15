@@ -32,11 +32,12 @@ export function HomePage() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="flex-1">
+      <main className="flex-1 bg-tech-gradient">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-8 md:py-10 lg:py-12">
             {/* Hero Section */}
-            <div className="text-center space-y-8 mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="text-center space-y-8 mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700 relative py-12 px-4 rounded-[3rem] overflow-hidden">
+              <div className="absolute inset-0 bg-grid-dot [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)] -z-10" />
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
                 <Sparkles className="w-3 h-3" />
                 <span>Curated Directory</span>
@@ -56,6 +57,10 @@ export function HomePage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1.5 px-2 py-1 rounded-md border bg-background/80 text-[10px] font-bold text-muted-foreground shadow-sm">
+                  <span className="text-[12px] leading-none">⌘</span>
+                  <span className="leading-none">K</span>
+                </div>
               </div>
             </div>
             {/* Category Tabs */}

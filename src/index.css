@@ -186,4 +186,13 @@
   .text-body {
     @apply text-base sm:text-lg text-muted-foreground leading-relaxed;
   }
+
+  .bg-grid-dot {
+    background-image: radial-gradient(hsl(var(--foreground) / 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .bg-tech-gradient {
+    background: radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.05) 0%, transparent 70%);
+  }
 }
