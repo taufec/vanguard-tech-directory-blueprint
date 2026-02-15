@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api-client';
@@ -12,8 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 export function DashboardPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore(s => s.user);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['my-projects', user?.id],
     queryFn: () => api<{ items: Project[] }>(`/api/projects?ownerId=${user?.id}`),
     enabled: !!user,
@@ -23,7 +24,8 @@ export function DashboardPage() {
     try {
       await api(`/api/projects/${id}`, { method: 'DELETE' });
       toast.success('Project Deleted');
-      refetch();
+      await queryClient.invalidateQueries({ queryKey: ['my-projects', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (err) {
       toast.error('Failed to Delete Project');
     }
@@ -145,7 +147,7 @@ export function DashboardPage() {
                 <Sparkles className="w-10 h-10 text-muted-foreground/30" />
               </div>
               <h3 className="text-2xl font-display font-bold">No active projects</h3>
-              <p className="text-muted-foreground max-w-sm mx-auto">You haven't submitted any projects yet. Share your creation and start building your presence.</p>
+              <p className="text-muted-foreground max-sm mx-auto">You haven't submitted any projects yet. Share your creation and start building your presence.</p>
             </div>
             <Link to="/submit">
               <Button className="h-12 px-10 rounded-xl font-bold text-lg shadow-lg shadow-primary/20">

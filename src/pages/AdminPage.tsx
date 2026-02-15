@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '@/components/layout/Navbar';
 import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api-client';
@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/dialog";
 export function AdminPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore(s => s.user);
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
   const [search, setSearch] = React.useState('');
@@ -59,7 +60,7 @@ export function AdminPage() {
   const [isImporting, setIsImporting] = React.useState(false);
   const [importDialogOpen, setImportDialogOpen] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['admin-projects'],
     queryFn: () => api<{ items: Project[] }>('/api/projects'),
     enabled: user?.role === 'admin',
@@ -98,6 +99,10 @@ export function AdminPage() {
       setSelectedIds(new Set(filteredProjects.map(p => p.id)));
     }
   };
+  const handleInvalidateAll = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['admin-projects'] });
+    await queryClient.invalidateQueries({ queryKey: ['projects'] });
+  };
   const handleExport = async () => {
     setIsExporting(true);
     try {
@@ -131,7 +136,7 @@ export function AdminPage() {
         });
         toast.success('Import Successful', { description: `Successfully processed ${result.count} records.` });
         setImportDialogOpen(false);
-        refetch();
+        await handleInvalidateAll();
       } catch (err) {
         toast.error('Import Failed', { description: 'The file provided is not a valid Vanguard data structure.' });
       } finally {
@@ -150,7 +155,7 @@ export function AdminPage() {
       });
       toast.success('Batch Delete Successful', { description: `${res.count} records removed from the directory.` });
       setSelectedIds(new Set());
-      refetch();
+      await handleInvalidateAll();
     } catch (err) {
       toast.error('Batch Delete Failed');
     }
@@ -160,7 +165,7 @@ export function AdminPage() {
     try {
       await api(`/api/projects/${id}`, { method: 'DELETE' });
       toast.success('Project Removed');
-      refetch();
+      await handleInvalidateAll();
     } catch (err) {
       toast.error('Removal Failed');
     }
