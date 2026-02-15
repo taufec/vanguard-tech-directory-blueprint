@@ -4,7 +4,7 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { Navbar } from '@/components/layout/Navbar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, Plus, Sparkles, SlidersHorizontal } from 'lucide-react';
+import { Search, Loader2, Plus, Sparkles, SlidersHorizontal, Rocket } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import type { Project } from '@shared/types';
@@ -52,7 +52,7 @@ export function HomePage() {
                 <Input
                   ref={searchInputRef}
                   placeholder="Search projects, tags, or tools..."
-                  className="pl-12 h-14 bg-secondary/30 border-border/50 focus:bg-background focus:border-primary focus:ring-primary/10 transition-all shadow-sm focus:shadow-md rounded-2xl text-lg"
+                  className="pl-12 h-14 bg-secondary/30 border-border/50 focus:bg-background focus:border-primary/50 focus:ring-primary/10 transition-all shadow-sm focus:shadow-md rounded-2xl text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -68,8 +68,8 @@ export function HomePage() {
                     size="sm"
                     className={cn(
                       "rounded-full px-5 py-2 h-9 text-sm font-medium transition-all shrink-0",
-                      selectedCategory === category 
-                        ? "shadow-md scale-105" 
+                      selectedCategory === category
+                        ? "shadow-md scale-105"
                         : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
                     )}
                     onClick={() => setSelectedCategory(category)}

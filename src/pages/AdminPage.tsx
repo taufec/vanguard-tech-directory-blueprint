@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api-client';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Link, useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import {
   Trash2,
   Plus,
@@ -38,6 +39,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
