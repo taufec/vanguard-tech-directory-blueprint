@@ -30,12 +30,12 @@ export function HomePage() {
     queryFn: () => api<{ items: Project[] }>('/api/projects'),
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
-  const projects = data?.items ?? [];
   // Optimized filtering
   const filteredProjects = React.useMemo(() => {
+    const projects = data?.items ?? [];
     const query = searchQuery.toLowerCase().trim();
     return projects.filter(p => {
-      const matchesSearch = !query || 
+      const matchesSearch = !query ||
         p.title.toLowerCase().includes(query) ||
         p.tagline.toLowerCase().includes(query) ||
         p.tags.some(t => t.toLowerCase().includes(query));
@@ -44,7 +44,7 @@ export function HomePage() {
         p.tags.some(t => t.toLowerCase() === selectedCategory.toLowerCase());
       return matchesSearch && matchesCategory;
     });
-  }, [projects, searchQuery, selectedCategory]);
+  }, [data?.items, searchQuery, selectedCategory]);
   const handleReset = () => {
     setSearchQuery('');
     setSelectedCategory('All');
