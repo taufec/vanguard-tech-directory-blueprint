@@ -24,7 +24,9 @@ export function ProjectDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const currentUser = useAuthStore(s => s.user);
+  // Zustand Zero-Tolerance: Primitive selectors only
+  const userId = useAuthStore(s => s.user?.id);
+  const userRole = useAuthStore(s => s.user?.role);
   const { data: project, isLoading, error } = useQuery({
     queryKey: ['project', id],
     queryFn: () => api<Project>(`/api/projects/${id}`),
@@ -57,9 +59,10 @@ export function ProjectDetailPage() {
       toast.success('Thanks for voting!');
     }
   });
+  // Fixed TS2554: Passing three arguments to checkProjectAccess
   const canManage = React.useMemo(() =>
-    project ? checkProjectAccess(currentUser, project.ownerId) : false
-  , [project, currentUser]);
+    project ? checkProjectAccess(userId, userRole, project.ownerId) : false
+  , [project, userId, userRole]);
   const handleDelete = async () => {
     try {
       await api(`/api/projects/${id}`, { method: 'DELETE' });
