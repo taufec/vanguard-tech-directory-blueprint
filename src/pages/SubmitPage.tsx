@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api-client';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Upload, X, Loader2, ArrowLeft } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Project } from '@shared/types';
 const schema = z.object({
   title: z.string().min(2, 'Title is too short').max(50),
@@ -28,6 +28,7 @@ type FormInput = z.infer<typeof schema>;
 export function SubmitPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore(s => s.user);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [logoPreview, setLogoPreview] = React.useState<string | null>(null);
@@ -102,6 +103,7 @@ export function SubmitPage() {
           body: JSON.stringify(payload),
         });
         toast.success('Project updated successfully!');
+        await queryClient.invalidateQueries({ queryKey: ['project', id] });
       } else {
         await api('/api/projects', {
           method: 'POST',
@@ -109,6 +111,7 @@ export function SubmitPage() {
         });
         toast.success('Project submitted successfully!');
       }
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
       navigate(id ? `/project/${id}` : '/');
     } catch (err) {
       toast.error('Submission failed', { description: err instanceof Error ? err.message : 'Unknown error' });
