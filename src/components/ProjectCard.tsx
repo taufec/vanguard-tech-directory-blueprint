@@ -10,7 +10,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link to={`/project/${project.id}`}>
-      <Card className="group overflow-hidden border-border/50 bg-card hover:border-primary/50 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+      <Card className="group overflow-hidden border-border/50 bg-card hover:border-primary/50 hover:shadow-glow hover:scale-[1.02] transition-all duration-300 h-full flex flex-col relative">
         <div className="aspect-video w-full overflow-hidden bg-muted/50 relative">
           {project.screenshotUrl ? (
             <img
@@ -32,8 +32,8 @@ export function ProjectCard({ project }: ProjectCardProps) {
             )}
           </div>
           <div className="absolute top-3 right-3">
-             <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-border/20 shadow-sm flex items-center gap-1.5 text-xs font-bold">
-                <ChevronUp className="w-3.5 h-3.5 text-primary" />
+             <div className="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-border/20 shadow-sm flex items-center gap-1.5 text-xs font-bold transition-colors group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary">
+                <ChevronUp className="w-3.5 h-3.5" />
                 <span>{project.votes || 0}</span>
              </div>
           </div>
