@@ -4,7 +4,7 @@
  */
  {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "vanguard-directory-opxjg755kilbd4bk7l4sw",
+	"name": "vanguard-tech-directory-blueprint",
 	"main": "worker/index.ts",
 	"compatibility_date": "2025-04-24",
 	"assets": {
