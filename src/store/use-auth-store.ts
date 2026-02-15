@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User } from '@shared/types';
+import type { User, UserRole } from '@shared/types';
 interface AuthState {
   user: User | null;
   login: (user: User) => void;
@@ -26,8 +26,16 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-export const checkProjectAccess = (user: User | null, ownerId: string) => {
-  if (!user) return false;
-  if (user.role === 'admin') return true;
-  return user.id === ownerId;
+/**
+ * Checks if a user has permission to manage a project.
+ * Uses primitive values to comply with the project's reliability standards.
+ */
+export const checkProjectAccess = (
+  userId: string | undefined,
+  userRole: UserRole | string | undefined,
+  ownerId: string
+) => {
+  if (!userId) return false;
+  if (userRole === 'admin') return true;
+  return userId === ownerId;
 };

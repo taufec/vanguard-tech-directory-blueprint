@@ -17,7 +17,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const user = useAuthStore(s => s.user);
+  // Zustand Zero-Tolerance: Primitive selectors only
+  const userId = useAuthStore(s => s.user?.id);
+  const userName = useAuthStore(s => s.user?.name);
+  const userAvatar = useAuthStore(s => s.user?.avatarUrl);
+  const userRole = useAuthStore(s => s.user?.role);
   const logout = useAuthStore(s => s.logout);
   const isHome = location.pathname === "/";
   return (
@@ -32,12 +36,12 @@ export function Navbar() {
               <span className="text-xl font-display font-bold tracking-tight">Vanguard</span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className={cn(
                   "text-sm font-medium transition-colors relative py-1",
-                  isHome 
-                    ? "text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full" 
+                  isHome
+                    ? "text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-full"
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -53,13 +57,15 @@ export function Navbar() {
                 <span className="hidden sm:inline">Submit Project</span>
               </Button>
             </Link>
-            {user ? (
+            {userId ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative flex items-center gap-2 pl-2 pr-1 hover:bg-accent/50">
                     <Avatar className="h-7 w-7 border">
-                      <AvatarImage src={user.avatarUrl} alt={user.name} />
-                      <AvatarFallback className="text-[10px] uppercase bg-muted">{user.name.slice(0, 2)}</AvatarFallback>
+                      <AvatarImage src={userAvatar} alt={userName || 'User'} />
+                      <AvatarFallback className="text-[10px] uppercase bg-muted">
+                        {userName ? userName.slice(0, 2) : '??'}
+                      </AvatarFallback>
                     </Avatar>
                     <ChevronDown className="h-3 w-3 text-muted-foreground" />
                   </Button>
@@ -67,8 +73,8 @@ export function Navbar() {
                 <DropdownMenuContent align="end" className="w-56 mt-1">
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-semibold leading-none">{user.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground capitalize">{user.role} Account</p>
+                      <p className="text-sm font-semibold leading-none">{userName}</p>
+                      <p className="text-xs leading-none text-muted-foreground capitalize">{userRole} Account</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -76,7 +82,7 @@ export function Navbar() {
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
-                  {user.role === 'admin' && (
+                  {userRole === 'admin' && (
                     <DropdownMenuItem onClick={() => navigate('/admin-db')} className="cursor-pointer text-primary focus:text-primary">
                       <Database className="mr-2 h-4 w-4" />
                       <span>Database (Admin)</span>
@@ -87,8 +93,8 @@ export function Navbar() {
                     <span>My Profile</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    className="text-destructive focus:bg-destructive/5 focus:text-destructive cursor-pointer" 
+                  <DropdownMenuItem
+                    className="text-destructive focus:bg-destructive/5 focus:text-destructive cursor-pointer"
                     onClick={() => logout()}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
