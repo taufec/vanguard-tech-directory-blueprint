@@ -4,7 +4,7 @@ import { ProjectCard } from '@/components/ProjectCard';
 import { Navbar } from '@/components/layout/Navbar';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, Plus, Sparkles } from 'lucide-react';
+import { Search, Loader2, Plus, Sparkles, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import type { Project } from '@shared/types';
@@ -37,12 +37,12 @@ export function HomePage() {
           <div className="py-8 md:py-10 lg:py-12">
             {/* Hero Section */}
             <div className="text-center space-y-8 mb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-4">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4">
                 <Sparkles className="w-3 h-3" />
                 <span>Curated Directory</span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight">
-                The next generation of <span className="text-primary">tech</span>
+              <h1 className="text-4xl md:text-6xl font-display font-bold tracking-tight text-balance">
+                The next generation of <span className="text-primary italic">tech</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
                 Discover and showcase the finest tools, apps, and platforms built by creators around the globe.
@@ -52,38 +52,50 @@ export function HomePage() {
                 <Input
                   ref={searchInputRef}
                   placeholder="Search projects, tags, or tools..."
-                  className="pl-12 h-14 bg-secondary/50 border-border/50 focus:border-primary focus:ring-primary/20 transition-all shadow-sm focus:shadow-md rounded-2xl text-lg"
+                  className="pl-12 h-14 bg-secondary/30 border-border/50 focus:bg-background focus:border-primary focus:ring-primary/10 transition-all shadow-sm focus:shadow-md rounded-2xl text-lg"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
             {/* Category Tabs */}
-            <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-4 no-scrollbar">
-              {CATEGORIES.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "rounded-full px-5 py-2 h-auto text-sm font-medium transition-all shrink-0",
-                    selectedCategory === category ? "shadow-md scale-105" : "text-muted-foreground border-border/50 hover:bg-muted/50"
-                  )}
-                  onClick={() => setSelectedCategory(category)}
-                >
-                  {category}
-                </Button>
-              ))}
+            <div className="flex items-center justify-between mb-10 gap-4">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar scroll-smooth flex-1">
+                {CATEGORIES.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "ghost"}
+                    size="sm"
+                    className={cn(
+                      "rounded-full px-5 py-2 h-9 text-sm font-medium transition-all shrink-0",
+                      selectedCategory === category 
+                        ? "shadow-md scale-105" 
+                        : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
+                    )}
+                    onClick={() => setSelectedCategory(category)}
+                  >
+                    {category}
+                  </Button>
+                ))}
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-muted-foreground/60">
+                <SlidersHorizontal className="w-4 h-4" />
+              </div>
             </div>
             {/* Grid Section */}
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-32 gap-4">
-                <Loader2 className="w-10 h-10 animate-spin text-primary/40" />
-                <p className="text-muted-foreground font-medium animate-pulse">Scanning the ecosystem...</p>
+              <div className="flex flex-col items-center justify-center py-32 gap-6">
+                <Loader2 className="w-12 h-12 animate-spin text-primary/30" />
+                <div className="text-center space-y-1">
+                  <p className="text-foreground font-semibold">Scanning the ecosystem</p>
+                  <p className="text-sm text-muted-foreground">Finding the best tech for you...</p>
+                </div>
               </div>
             ) : error ? (
-              <div className="text-center py-20 border rounded-2xl bg-destructive/5 border-destructive/10">
-                <p className="text-destructive font-medium">Failed to load projects. Please try refreshing the page.</p>
+              <div className="text-center py-20 border rounded-3xl bg-destructive/5 border-destructive/10 max-w-2xl mx-auto">
+                <p className="text-destructive font-semibold mb-2">Sync Error</p>
+                <p className="text-muted-foreground mb-6">We couldn't reach the database. Please try refreshing.</p>
+                <Button variant="outline" onClick={() => window.location.reload()}>Refresh Page</Button>
               </div>
             ) : filteredProjects.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
@@ -92,24 +104,27 @@ export function HomePage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 space-y-6 border-2 border-dashed rounded-3xl bg-muted/20 max-w-2xl mx-auto">
-                <div className="space-y-2">
-                  <p className="text-xl font-bold">No results found</p>
-                  <p className="text-muted-foreground">
+              <div className="text-center py-24 space-y-8 border-2 border-dashed rounded-[2.5rem] bg-muted/10 max-w-3xl mx-auto px-6">
+                <div className="space-y-3">
+                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-8 h-8 text-muted-foreground/40" />
+                  </div>
+                  <h3 className="text-2xl font-display font-bold">No projects found</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
                     {searchQuery
                       ? `We couldn't find any projects matching "${searchQuery}" in ${selectedCategory}`
-                      : `The ${selectedCategory} category is currently empty.`}
+                      : `The ${selectedCategory} category is currently waiting for its first submission.`}
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                   {(searchQuery || selectedCategory !== 'All') && (
-                    <Button variant="outline" onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}>
-                      Clear Filters
+                    <Button variant="outline" className="rounded-xl h-11 px-6" onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}>
+                      Reset Filters
                     </Button>
                   )}
                   <Link to="/submit">
-                    <Button className="gap-2 shadow-primary">
-                      <Plus className="w-4 h-4" /> Be the first to submit
+                    <Button className="rounded-xl h-11 px-8 gap-2 shadow-primary">
+                      <Plus className="w-4 h-4" /> Submit Your Project
                     </Button>
                   </Link>
                 </div>
@@ -118,12 +133,20 @@ export function HomePage() {
           </div>
         </div>
       </main>
-      <footer className="border-t py-12 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} Vanguard Directory. Built for the modern web.</p>
-          <div className="flex items-center gap-6">
-            <Link to="/submit" className="hover:text-foreground transition-colors">Submit</Link>
-            <Link to="/dashboard" className="hover:text-foreground transition-colors">Dashboard</Link>
+      <footer className="border-t py-12 bg-muted/20 mt-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded bg-muted">
+                <Rocket className="w-4 h-4" />
+              </div>
+              <p className="font-medium">© {new Date().getFullYear()} Vanguard Directory</p>
+            </div>
+            <div className="flex items-center gap-8">
+              <Link to="/submit" className="hover:text-foreground transition-colors font-medium">Submit</Link>
+              <Link to="/dashboard" className="hover:text-foreground transition-colors font-medium">Dashboard</Link>
+              <a href="#" className="hover:text-foreground transition-colors font-medium">Terms</a>
+            </div>
           </div>
         </div>
       </footer>
