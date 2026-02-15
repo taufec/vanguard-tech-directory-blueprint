@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ProjectCard } from '@/components/ProjectCard';
 import { Navbar } from '@/components/layout/Navbar';
@@ -11,9 +11,19 @@ import type { Project } from '@shared/types';
 import { cn } from '@/lib/utils';
 const CATEGORIES = ['All', 'SaaS', 'DevTools', 'Web3', 'Design', 'Analytics', 'Productivity', 'Infrastructure'];
 export function HomePage() {
-  const [searchQuery, setSearchQuery] = React.useState('');
-  const [selectedCategory, setSelectedCategory] = React.useState('All');
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   const { data, isLoading, error } = useQuery({
     queryKey: ['projects'],
     queryFn: () => api<{ items: Project[] }>('/api/projects'),

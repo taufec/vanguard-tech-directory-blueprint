@@ -5,40 +5,66 @@ import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api-client';
 import { useAuthStore } from '@/store/use-auth-store';
 import { Link, useNavigate } from 'react-router-dom';
-import { Edit, Trash2, Plus, ExternalLink, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
-import type { Project } from '@shared/types';
+import { Edit, Trash2, Plus, ExternalLink, Loader2, ShieldCheck, Sparkles, LogIn } from 'lucide-react';
+import type { Project, User } from '@shared/types';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+const MOCK_ADMIN_USER: User = {
+  id: 'u1',
+  name: 'Admin Demo',
+  email: 'admin@vanguard.tech',
+  role: 'admin',
+  avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
+};
 export function DashboardPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  // Zustand Zero-Tolerance: Primitive selectors only
   const user = useAuthStore(s => s.user);
+  const userId = useAuthStore(s => s.user?.id);
+  const userRole = useAuthStore(s => s.user?.role);
+  const login = useAuthStore(s => s.login);
   const { data, isLoading } = useQuery({
-    queryKey: ['my-projects', user?.id],
-    queryFn: () => api<{ items: Project[] }>(`/api/projects?ownerId=${user?.id}`),
-    enabled: !!user,
+    queryKey: ['my-projects', userId],
+    queryFn: () => api<{ items: Project[] }>(`/api/projects?ownerId=${userId}`),
+    enabled: !!userId,
   });
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this project? This cannot be undone.')) return;
     try {
       await api(`/api/projects/${id}`, { method: 'DELETE' });
       toast.success('Project Deleted');
-      await queryClient.invalidateQueries({ queryKey: ['my-projects', user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ['my-projects', userId] });
       await queryClient.invalidateQueries({ queryKey: ['projects'] });
     } catch (err) {
       toast.error('Failed to Delete Project');
     }
   };
-  if (!user) {
+  const handleDemoLogin = () => {
+    login(MOCK_ADMIN_USER);
+    toast.success('Logged in as Demo Admin');
+  };
+  if (!userId) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-muted/20">
-        <div className="bg-background p-10 rounded-[2rem] border shadow-xl text-center space-y-6 max-w-sm">
+        <div className="bg-background p-10 rounded-[2rem] border shadow-xl text-center space-y-6 max-w-sm w-full">
           <div className="w-16 h-16 bg-muted rounded-2xl flex items-center justify-center mx-auto">
             <ShieldCheck className="w-8 h-8 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground font-medium">Please sign in to access your creator dashboard.</p>
-          <Button onClick={() => navigate('/')} className="w-full h-12 rounded-xl">Return to Directory</Button>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold">Access Restricted</h2>
+            <p className="text-muted-foreground text-sm">Please sign in to access your creator dashboard and manage your projects.</p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Button onClick={handleDemoLogin} className="w-full h-12 rounded-xl gap-2 font-bold shadow-lg shadow-primary/10">
+              <LogIn className="w-4 h-4" />
+              Sign In (Demo Admin)
+            </Button>
+            <Button onClick={() => navigate('/')} variant="ghost" className="w-full h-12 rounded-xl">
+              Return to Directory
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -54,7 +80,7 @@ export function DashboardPage() {
             <p className="text-muted-foreground text-lg">Manage and monitor your tech submissions.</p>
           </div>
           <div className="flex items-center gap-4">
-            {user.role === 'admin' && (
+            {userRole === 'admin' && (
               <Link to="/admin-db">
                 <Button variant="outline" className="gap-2 h-11 px-6 rounded-xl border-primary/20 hover:border-primary hover:bg-primary/5 text-primary transition-all">
                   <ShieldCheck className="w-4 h-4" />
